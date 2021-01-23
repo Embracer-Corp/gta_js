@@ -6,7 +6,7 @@ const ctx = canvas.getContext("2d");
 
 var fps = 1000/100;
 var lps = 1000/100;
-var player = {x: canvas.width/2, y: canvas.height/2, radius: 50, speed: 500, prevPos: {x: 100, y: 100}, camera: {x:canvas.width/2, y:canvas.height/2}}
+var player = {x: canvas.width/2, y: canvas.height/2, radius: 50, speed: 500, prevPos: {x: 100, y: 100}, camera: {x:canvas.width/2, y:canvas.height/2}, collision:false}
 var control = {isGoLeft: false, isGoRight: false, isGoUp: false, isGoDown: false}
 var settings = {width:1000, height:1000, gridSize: 250}
 var map = {"rec":{x:275, y:200, w:300, h:150}}
@@ -59,30 +59,49 @@ setInterval(function() {
   
   normalize(distance, maxSpeed)
   
-  if (player.x + distance.x - player.radius < 0) {
-    console.log(`x: ${player.x}, distX: ${distance.x}, R: ${player.radius}, newDistX: ${distance.x + player.radius -player.x - distance.x}`)
+  if (player.x - player.radius + distance.x < 0) {
     distance.x = player.radius - player.x
+  } else if (player.x + player.radius + distance.x > settings.width) {
+    distance.x = settings.width - player.radius - player.x
+  }
+  if (player.y - player.radius + distance.y < 0) {
+    distance.y = player.radius - player.y
+  } else if (player.y + player.radius + distance.y > settings.height) {
+    distance.y = settings.height - player.radius - player.y
   }
 
-
+  let isCollision = false
   for(let c in map)
   {
-    //map[c].x, map[c].y, map[c].w, map[c].h
     console.log(`R:${player.radius}, x:${player.x.toFixed(2)}, y:${player.y.toFixed(2)}, a:${map[c].x}, b:${map[c].y}, dy2:${player.radius*player.radius - player.y*player.y}, dx:${Math.sqrt(player.radius*player.radius - player.x*player.x)}`)
     if(Math.abs(Math.sqrt(player.radius*player.radius - player.y*player.y) - map[c].y) <= 0.1 && Math.abs(Math.sqrt(player.radius*player.radius - player.x*player.x) - map[c].x) <= 0.1) {
-      console.log("@@")
+      isCollision = true
     }
     if(player.x >= map[c].x && player.x <= map[c].w + map[c].x &&
        player.y >= map[c].y && player.y <= map[c].h + map[c].y )
     {
-      console.log("!!")
+      isCollision = true
     }
   }
+  player.collision = isCollision
     
   player.x += distance.x
   player.y += distance.y
-  player.camera.x += distance.x
-  player.camera.y += distance.y
+  
+  if (player.x - canvas.width/2 < 0 && player.x + canvas.width/2 < settings.width) {
+    player.camera.x = canvas.width/2
+  } else if (player.x - canvas.width/2 > 0 && player.x + canvas.width/2 > settings.width) {
+    player.camera.x = settings.width - canvas.width/2
+  } else {
+    player.camera.x = player.x
+  }
+  if (player.y - canvas.height/2 < 0 && player.y + canvas.height/2 < settings.height) {
+    player.camera.y = canvas.height/2
+  } else if (player.y - canvas.height/2 > 0 && player.y + canvas.height/2 > settings.height) {
+    player.camera.y = settings.height - canvas.height/2
+  } else {
+    player.camera.y = player.y
+  }
   
   lastTimeLogic += timePass; // state logic computation completed at START of function
 }, 10)
@@ -126,6 +145,17 @@ setInterval(function() {
     }
   }
 
+  ctx.strokeStyle = player.collision?"#FF2000":"#000"
+  for(let c in map)
+  {
+    ctx.fillStyle = "#307540"
+    ctx.fillRect(canvas.width/2 -player.camera.x + map[c].x, canvas.height/2 -player.camera.y + map[c].y, map[c].w, map[c].h)
+    ctx.fillStyle = "#000"
+    ctx.strokeRect(canvas.width/2 -player.camera.x + map[c].x, canvas.height/2 -player.camera.y + map[c].y, map[c].w, map[c].h)
+    let text = `x: ${map[c].x.toFixed(2)}, y:${map[c].y.toFixed(2)}`
+    ctx.fillText(text, canvas.width/2 -player.camera.x + map[c].x + 5, canvas.height/2 -player.camera.y + map[c].y + 15)
+  }
+
   ctx.fillStyle = "#902000"
   ctx.beginPath();
   ctx.arc(canvas.width/2 -player.camera.x + player.x, canvas.height/2 -player.camera.y + player.y, player.radius, 0, 2 * Math.PI);
@@ -135,14 +165,8 @@ setInterval(function() {
   ctx.stroke();
   ctx.fillStyle = "#000"
   ctx.fillRect(canvas.width/2 -player.camera.x + player.x - 1, canvas.height/2 -player.camera.y + player.y - 1, 2, 2)
-  // let text = `x: ${player.x}\r\ny:${player.y}`
-  // ctx.fillText(`x: ${player.x.toFixed(2)}\r\ny:${player.y.toFixed(2)}`, canvas.width/2 -player.camera.x + player.x - ctx.measureText(text).width/2, canvas.height/2 -player.camera.y + player.y+15)
-
-  for(let c in map)
-  {
-    ctx.fillStyle = "#307540"
-    ctx.fillRect(canvas.width/2 -player.camera.x + map[c].x, canvas.height/2 -player.camera.y + map[c].y, map[c].w, map[c].h)
-  }
+  let text = `x: ${player.x.toFixed(2)}, y:${player.y.toFixed(2)}`
+  ctx.fillText(text, canvas.width/2 -player.camera.x + player.x - ctx.measureText(text).width/2, canvas.height/2 -player.camera.y + player.y+15)
 
   
   // for (let i = Math.floor((game.control.camera.y - canvas.height/2)/game.settings.tileSize); i < (game.control.camera.y + canvas.height/2)/game.settings.tileSize; i++) {

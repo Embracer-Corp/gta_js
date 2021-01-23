@@ -1,0 +1,38 @@
+{
+  "name": "node-gta",
+  "version": "1.0.0",
+  "description": "Simple gta",
+  "main": "index.js",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node index.js",
+    "dev": "cross-env NODE_ENV=development nodemon index.js",
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "gta_js"
+  },
+  "keywords": [
+    "node",
+    "nodejs",
+    "gta"
+  ],
+  "author": "Andreev Andrei <AndreevAndreiV@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^7.17.0",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-plugin-node": "^11.1.0",
+    "nodemon": "^2.0.7"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "dependencies": {
+    "cross-env": "^7.0.3",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "socket.io": "^3.1.0",
+    "socket.io-client": "^3.1.0"
+  }
+}

@@ -2,16 +2,17 @@
 /*eslint no-undef: "error"*/
 
 const canvas = document.getElementById("canvas")
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d")
 
-var fps = 1000/100;
-var lps = 1000/100;
+var fps = 1000/100
+var lps = 1000/100
 var player = {x: canvas.width/2, y: canvas.height/2, radius: 50, speed: 500, camera: {x:canvas.width/2, y:canvas.height/2}, collision:false}
 var control = {
   keyboard: {isGoLeft: false, isGoRight: false, isGoUp: false, isGoDown: false}, mouse: {x: 0, y: 0, hold: null}, touch0: {x: 0, y: 0, hold: null},
   stickAreaRadius: 100, stickSizeRadius: 30,
   get axis() {
     let res = { x: this.keyboard.isGoRight - this.keyboard.isGoLeft, y: this.keyboard.isGoDown - this.keyboard.isGoUp }
+    multiplication(res, this.stickAreaRadius - this.stickSizeRadius)
     if (this.mouse.hold != null) {
       res.x += this.mouse.x - this.mouse.hold.x
       res.y += this.mouse.y - this.mouse.hold.y
@@ -32,23 +33,23 @@ var settings = {width:2000, height:2000, gridSize: 250}
 var map = {"rec":{x:275, y:200, w:300, h:150}}
 var test = ""
 
-canvas.width = 400;
-canvas.height = 745;
+canvas.width = 400
+canvas.height = 745
 
 
 function HotLog(txt) {
-  document.getElementById("hotLog").innerHTML = txt;
+  document.getElementById("hotLog").innerHTML = txt
 }
 
 function lerp(v1, v2, w) {
-    return v1 + w * (v2 - v1);
+    return v1 + w * (v2 - v1)
 }
 
 function normalize(vector, scale) {
-  var norm = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+  var norm = Math.sqrt(vector.x * vector.x + vector.y * vector.y)
   if (norm != 0) {
-    vector.x = scale * vector.x / norm;
-    vector.y = scale * vector.y / norm;
+    vector.x = scale * vector.x / norm
+    vector.y = scale * vector.y / norm
   }
 }
 function multiplication(vector, scale) {
@@ -56,12 +57,12 @@ function multiplication(vector, scale) {
   vector.y *= scale
 }
 
-var lastTimeLogic = Date.now();
+var lastTimeLogic = Date.now()
 setInterval(function() {
-  let timePass = Date.now() - lastTimeLogic;
+  let timePass = Date.now() - lastTimeLogic
   
   if (timePass < lps) {
-      return;
+      return
   }
 
   let maxSpeed = player.speed * timePass / 1000
@@ -82,13 +83,9 @@ setInterval(function() {
   let isCollision = false
   for(let c in map)
   {
-    //console.log(`R:${player.radius}, x:${player.x.toFixed(2)}, y:${player.y.toFixed(2)}, a:${map[c].x}, b:${map[c].y}, dy2:${player.radius*player.radius - player.y*player.y}, dx:${Math.sqrt(player.radius*player.radius - player.x*player.x)}`)
-    if(Math.abs(Math.sqrt(player.radius*player.radius - player.y*player.y) - map[c].y) <= 0.1 && Math.abs(Math.sqrt(player.radius*player.radius - player.x*player.x) - map[c].x) <= 0.1) {
-      isCollision = true
-    }
-    if(player.x >= map[c].x && player.x <= map[c].w + map[c].x &&
-       player.y >= map[c].y && player.y <= map[c].h + map[c].y )
-    {
+    let deltaX = player.x - Math.max(map[c].x, Math.min(player.x, map[c].x + map[c].w))
+    let deltaY = player.y - Math.max(map[c].y, Math.min(player.y, map[c].y + map[c].h))
+    if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) < player.radius) {
       isCollision = true
     }
   }
@@ -115,17 +112,17 @@ setInterval(function() {
   lastTimeLogic += timePass; // state logic computation completed at START of function
 }, 10)
 
-var lastTimeGraphic = Date.now();
+var lastTimeGraphic = Date.now()
 setInterval(function() {
   let timePass = Date.now() - lastTimeGraphic; // guess will better change "nextTimeRender > Date.now()"
   if (timePass < fps) {
-      return;
+      return
   }
   
   canvas.width = document.documentElement.clientWidth - 20
   canvas.height = document.documentElement.clientHeight - 20
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
 
   ctx.font = "12px bold Lucida Console"; // need to remove bold
 
@@ -158,83 +155,83 @@ setInterval(function() {
   ctx.fillText(text, canvas.width/2 -player.camera.x + player.x - ctx.measureText(text).width/2, canvas.height/2 -player.camera.y + player.y+15)
 
   if (control.mouse.hold != null) {
-    ctx.fillStyle = "#00000030";
-    ctx.beginPath();ctx.arc(control.mouse.hold.x, control.mouse.hold.y, control.stickAreaRadius, 0, 2 * Math.PI);
+    ctx.fillStyle = "#00000030"
+    ctx.beginPath();ctx.arc(control.mouse.hold.x, control.mouse.hold.y, control.stickAreaRadius, 0, 2 * Math.PI)
     ctx.fill(); ctx.stroke()
-    ctx.beginPath();ctx.arc(control.mouse.hold.x, control.mouse.hold.y, control.stickSizeRadius, 0, 2 * Math.PI);
+    ctx.beginPath();ctx.arc(control.mouse.hold.x, control.mouse.hold.y, control.stickSizeRadius, 0, 2 * Math.PI)
     ctx.fill()
-    ctx.fillStyle = "#333333";
-    ctx.beginPath();ctx.arc(control.mouse.x, control.mouse.y, control.stickSizeRadius, 0, 2 * Math.PI);
+    ctx.fillStyle = "#333333"
+    ctx.beginPath();ctx.arc(control.mouse.x, control.mouse.y, control.stickSizeRadius, 0, 2 * Math.PI)
     ctx.fill(); ctx.stroke()
   }
   if (control.touch0.hold != null) {
-    ctx.fillStyle = "#00000030";
-    ctx.beginPath();ctx.arc(control.touch0.hold.x, control.touch0.hold.y, control.stickAreaRadius, 0, 2 * Math.PI);
+    ctx.fillStyle = "#00000030"
+    ctx.beginPath();ctx.arc(control.touch0.hold.x, control.touch0.hold.y, control.stickAreaRadius, 0, 2 * Math.PI)
     ctx.fill(); ctx.stroke()
-    ctx.beginPath();ctx.arc(control.touch0.hold.x, control.touch0.hold.y, control.stickSizeRadius, 0, 2 * Math.PI);
+    ctx.beginPath();ctx.arc(control.touch0.hold.x, control.touch0.hold.y, control.stickSizeRadius, 0, 2 * Math.PI)
     ctx.fill()
-    ctx.fillStyle = "#333333";
-    ctx.beginPath();ctx.arc(control.touch0.x, control.touch0.y, control.stickSizeRadius, 0, 2 * Math.PI);
+    ctx.fillStyle = "#333333"
+    ctx.beginPath();ctx.arc(control.touch0.x, control.touch0.y, control.stickSizeRadius, 0, 2 * Math.PI)
     ctx.fill(); ctx.stroke()
   }
   ctx.fillText(test, 20, 20)
 
   lastTimeGraphic += timePass; // finished drawing data at the start of the function
-}, 10);
+}, 10)
 
 /// --- EVENTS ---
 
 function onMouseUpdate(e) {
-  // if (e.toElement != canvas) return;
+  // if (e.toElement != canvas) return
   
-  control.mouse.x = e.x - canvas.offsetLeft;
-  control.mouse.y = e.y - canvas.offsetTop;
+  control.mouse.x = e.x - canvas.offsetLeft
+  control.mouse.y = e.y - canvas.offsetTop
   
   // if (control.mouse.hold != null) {
   // }
 }
 
-document.addEventListener('mousemove', onMouseUpdate, false);
-document.addEventListener('mouseenter', onMouseUpdate, false);
+document.addEventListener('mousemove', onMouseUpdate, false)
+document.addEventListener('mouseenter', onMouseUpdate, false)
 
 function moverSet(e) {
   if (e.ctrlKey || e.altKey) return
   // if ('type' in e && e['type'] == 'keydown') { console.log("key pressed '"+e.key+"'") }
   switch (e.key) {    
     case 'a': case 'arrowLeft':
-      control.keyboard.isGoLeft = true;
-      break;
+      control.keyboard.isGoLeft = true
+      break
     case 'd': case 'arrowRight':
-      control.keyboard.isGoRight = true;
-      break;
+      control.keyboard.isGoRight = true
+      break
     case 'w': case 'arrowUp':
-      control.keyboard.isGoUp = true;
-      break;
+      control.keyboard.isGoUp = true
+      break
     case 's': case 'arrowDown':
-      control.keyboard.isGoDown = true;
-      break;
+      control.keyboard.isGoDown = true
+      break
   }
 }
 
 function moverReset(e) {
   switch (e.key) {
     case 'a':
-      control.keyboard.isGoLeft = false;
-      break;
+      control.keyboard.isGoLeft = false
+      break
     case 'd':
-      control.keyboard.isGoRight = false;
-      break;
+      control.keyboard.isGoRight = false
+      break
     case 'w':
-      control.keyboard.isGoUp = false;
-      break;
+      control.keyboard.isGoUp = false
+      break
     case 's':
-      control.keyboard.isGoDown = false;
-      break;
+      control.keyboard.isGoDown = false
+      break
   }
 }
 
-addEventListener("keydown", moverSet);
-addEventListener("keyup", moverReset);
+addEventListener("keydown", moverSet)
+addEventListener("keyup", moverReset)
 
 canvas.onmousedown = function(e) {
   // console.dir(document)
@@ -250,7 +247,7 @@ canvas.onmousewheel = function(e) {
 }
 
 addEventListener('touchstart', function(ev) {
-  ev.preventDefault();
+  ev.preventDefault()
   test = document.documentElement.clientWidth + ", " + document.documentElement.clientHeight
   //test = document.fullscreenElement
   if (document.fullscreenElement == null ) { canvas.requestFullscreen() }
@@ -263,15 +260,15 @@ addEventListener('touchstart', function(ev) {
 }, false)
 
 addEventListener("touchend", function(ev) {
-  ev.preventDefault();
+  ev.preventDefault()
   control['touch0'].hold = null
 }, false)
 
 addEventListener("touchmove", function(ev) {
-  ev.preventDefault();
+  ev.preventDefault()
   // console.dir(ev)
   //test = ev.changedTouches[0].pageX
   control['touch0'].x = ev.changedTouches[0].pageX + canvas.offsetLeft
   control['touch0'].y = ev.changedTouches[0].pageY + canvas.offsetTop
-}, false);
+}, false)
 
